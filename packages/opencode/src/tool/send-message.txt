@@ -1,0 +1,1 @@
+Send an asynchronous message to a running agent. Use this to delegate tasks, ask questions, or share information with another agent. The message will be delivered asynchronously and the receiving agent will process it when it can.

@@ -1,0 +1,1 @@
+Create a new dynamic agent at runtime. This allows you to define a specialized agent with a custom system prompt and optionally a different model. The agent will be registered with the agent manager and available for task delegation and message routing.
