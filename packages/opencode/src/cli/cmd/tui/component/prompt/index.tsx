@@ -17,7 +17,7 @@ import { Filesystem } from "@/util/filesystem"
 import { useLocal } from "@tui/context/local"
 import { tint, useTheme } from "@tui/context/theme"
 import { EmptyBorder, SplitBorder } from "@tui/component/border"
-import { Spinner } from "@tui/component/spinner"
+import { Spinner, SPINNER_FRAMES } from "@tui/component/spinner"
 import { useSDK } from "@tui/context/sdk"
 import { useRoute } from "@tui/context/route"
 import { useProject } from "@tui/context/project"
@@ -90,6 +90,20 @@ const money = new Intl.NumberFormat("en-US", {
   currency: "USD",
 })
 
+const AGENT_IDS = ["A", "B", "C"] as const
+const AGENT_NAMES: Record<(typeof AGENT_IDS)[number], string> = { A: "Alice", B: "Bob", C: "Carol" }
+
+function AgentStatusDot(props: { name: string; busy: boolean; accent: RGBA; muted: RGBA }) {
+  return (
+    <box flexDirection="row" gap={1}>
+      <Show when={props.busy} fallback={<text fg={props.muted}>○</text>}>
+        <spinner frames={SPINNER_FRAMES} interval={80} color={props.accent} />
+      </Show>
+      <text fg={props.busy ? props.accent : props.muted}>{props.name}</text>
+    </box>
+  )
+}
+
 const DRAFT_RETENTION_MIN_CHARS = 20
 
 function randomIndex(count: number) {
@@ -158,6 +172,16 @@ export function Prompt(props: PromptProps) {
   const kv = useKV()
   const animationsEnabled = createMemo(() => kv.get("animations_enabled", true))
   const list = createMemo(() => props.placeholders?.normal ?? [])
+  const agentStatuses = createMemo<Record<string, string>>(() => {
+    const result: Record<string, string> = { A: "idle", B: "idle", C: "idle" }
+    for (const sess of sync.data.session) {
+      const id = sess.agent
+      if (id !== "A" && id !== "B" && id !== "C") continue
+      const s = sync.data.session_status?.[sess.id]
+      if (s?.type === "busy") result[id] = "busy"
+    }
+    return result
+  })
   const shell = createMemo(() => props.placeholders?.shell ?? [])
   const fileContextEnabled = createMemo(() => kv.get("file_context_enabled", true))
   const [dismissedEditorSelectionKey, setDismissedEditorSelectionKey] = createSignal<string>()
@@ -378,7 +402,7 @@ export function Prompt(props: PromptProps) {
         name: "session.interrupt",
         category: "Session",
         hidden: true,
-        enabled: status().type !== "idle",
+        enabled: () => status().type !== "idle",
         run: () => {
           if (auto()?.visible) return
           if (!input.focused) return
@@ -1464,10 +1488,9 @@ export function Prompt(props: PromptProps) {
               <box flexDirection="row" gap={1}>
                 <Show when={local.agent.current()} fallback={<box height={1} />}>
                   {(agent) => {
-                    const modeLabel = store.mode === "shell" ? "Shell" : (modeCtx.mode() === "plan" ? "Plan" : "Build")
                     return <>
                       <text fg={fadeColor(highlight(), agentMetaAlpha())}>
-                        {modeLabel}
+                        {store.mode === "shell" ? "Shell" : modeCtx.mode(agent().name) === "plan" ? "Plan" : "Build"}
                       </text>
                       <text fg={fadeColor(theme.textMuted, modelMetaAlpha())}> · </text>
                       <text fg={fadeColor(highlight(), agentMetaAlpha())}>
@@ -1533,7 +1556,19 @@ export function Prompt(props: PromptProps) {
         </box>
         <box width="100%" flexDirection="row" justifyContent="space-between">
           <box flexDirection="row" gap={2} flexShrink={0} paddingLeft={3}>
-            <text fg={theme.textMuted}>○ A  ○ B  ○ C</text>
+            <For each={AGENT_IDS}>
+              {(id) => {
+                const busy = createMemo(() => agentStatuses()[id] === "busy")
+                return (
+                  <AgentStatusDot
+                    name={AGENT_NAMES[id]}
+                    busy={busy()}
+                    accent={theme.accent}
+                    muted={theme.textMuted}
+                  />
+                )
+              }}
+            </For>
           </box>
           <Switch>
             <Match when={status().type !== "idle"}>

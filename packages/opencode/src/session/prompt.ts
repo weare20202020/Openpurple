@@ -1220,11 +1220,12 @@ export const layer = Layer.effect(
         const slog = elog.with({ sessionID })
         let structured: unknown
         let step = 0
-        const session = yield* sessions.get(sessionID).pipe(Effect.orDie)
 
         while (true) {
           yield* status.set(sessionID, { type: "busy" })
           yield* slog.info("loop", { step })
+
+          const session = yield* sessions.get(sessionID).pipe(Effect.orDie)
 
           let msgs = yield* MessageV2.filterCompactedEffect(sessionID).pipe(
             Effect.provideService(Database.Service, database),
@@ -1414,6 +1415,17 @@ export const layer = Layer.effect(
               MessageV2.toModelMessagesEffect(msgs, model),
             ])
             const system = [...env, ...instructions, ...(skills ? [skills] : [])]
+            const editRule = (session.permission ?? []).findLast(
+              (r) => r.permission === "edit",
+            )
+            if (editRule?.action === "deny") {
+              system.unshift(
+                "You are in PLAN mode. You CANNOT edit, write, or patch any files. " +
+                  "You can only discuss, plan, analyze, search, read files, and ask questions. " +
+                  "Do not attempt to use Edit, Write, or ApplyPatch tools — they are disabled. " +
+                  "When you need to proceed with implementation, ask the user to switch you to Build mode.",
+              )
+            }
             const format = lastUser.format ?? { type: "text" as const }
             if (format.type === "json_schema") system.push(STRUCTURED_OUTPUT_SYSTEM_PROMPT)
             const result = yield* handle.process({

@@ -801,6 +801,12 @@ export const layer: Layer.Layer<
     })
 
     const setMetadata = Effect.fn("Session.setMetadata")(function* (input: typeof SetMetadataInput.Type) {
+      yield* db
+        .update(SessionTable)
+        .set({ metadata: input.metadata, time_updated: Date.now() })
+        .where(eq(SessionTable.id, input.sessionID))
+        .run()
+        .pipe(Effect.orDie)
       yield* patch(input.sessionID, { metadata: input.metadata, time: { updated: Date.now() } }).pipe(Effect.orDie)
     })
 
@@ -808,6 +814,12 @@ export const layer: Layer.Layer<
       sessionID: SessionID
       permission: PermissionV1.Ruleset
     }) {
+      yield* db
+        .update(SessionTable)
+        .set({ permission: [...input.permission], time_updated: Date.now() })
+        .where(eq(SessionTable.id, input.sessionID))
+        .run()
+        .pipe(Effect.orDie)
       yield* patch(input.sessionID, { permission: [...input.permission], time: { updated: Date.now() } }).pipe(
         Effect.orDie,
       )

@@ -1,6 +1,6 @@
 # OpenPurple — 项目状态
 
-> 最后更新: 2026-06-09
+> 最后更新: 2026-06-15
 
 ---
 
@@ -32,6 +32,20 @@ D:\桌面\Purple-AI\
 ## 当前状态
 
 **`openpurple` 命令可用** — 指向 exe 在 `packages/opencode/dist/openpurple-windows-x64/bin/openpurple.exe`
+
+### 已完成
+
+#### Mode 切换（Build / Plan）
+- **TAB** 切换当前 Agent（A/B/C）的 mode：Build ↔ Plan
+- Build mode：正常模式，所有工具可用
+- Plan mode：只读模式，edit / write / apply_patch 被禁止
+  - System prompt 注入 Plan 提示词
+  - 工具字典层面删除 edit 工具定义（LLM 看不到，不会调用）
+  - Session permission 持久化到 SQLite，断线重建不丢失
+- Shift+TAB 反向切换
+- 状态标签实时反映在左下角
+- Per-agent 独立 mode（A 在 Plan，B 仍在 Build）
+- KV 存储（`~/.local/state/openpurple/kv.json`）
 
 ### 已完成（属于 opencode 上游自带 + 本地 branding）
 - 完整的 CLI 框架（yargs, 20+ 子命令）

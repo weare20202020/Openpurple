@@ -388,6 +388,23 @@ function App(props: { onSnapshot?: () => Promise<string[]> }) {
   const exit = useExit()
   const promptRef = usePromptRef()
   const modeCtx = useMode()
+
+  const applyModePermission = async (_agentName: string, mode: "build" | "plan") => {
+    const sid = route.data.type === "session" ? route.data.sessionID : undefined
+    if (!sid) return
+    const rules =
+      mode === "plan"
+        ? [{ permission: "edit", pattern: "*", action: "deny" as const }]
+        : [{ permission: "edit", pattern: "*", action: "allow" as const }]
+    try {
+      await sdk.client.session.update({
+        sessionID: sid,
+        permission: rules,
+      } as any)
+    } catch {
+      toast.show({ variant: "error", message: "Failed to apply mode permission" })
+    }
+  }
   const routes: RouteMap = new Map()
   const [routeRev, setRouteRev] = createSignal(0)
   const routeView = (name: string) => {
@@ -709,7 +726,10 @@ function App(props: { onSnapshot?: () => Promise<string[]> }) {
         category: "Agent",
         hidden: true,
         run: () => {
-          modeCtx.toggle()
+          const cur = local.agent.current()
+          if (!cur) return
+          modeCtx.toggle(cur.name)
+          void applyModePermission(cur.name, modeCtx.mode(cur.name))
         },
       },
       {
@@ -738,11 +758,15 @@ function App(props: { onSnapshot?: () => Promise<string[]> }) {
         },
       },
       {
+        name: "agent.cycle.reverse",
         title: "Switch mode reverse",
         category: "Agent",
         hidden: true,
         run: () => {
-          modeCtx.toggle()
+          const cur = local.agent.current()
+          if (!cur) return
+          modeCtx.toggle(cur.name)
+          void applyModePermission(cur.name, modeCtx.mode(cur.name))
         },
       },
       {

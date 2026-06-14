@@ -39,3 +39,4 @@ log/
 # OS
 Thumbs.db
 .bun-build
+*.bun-build
