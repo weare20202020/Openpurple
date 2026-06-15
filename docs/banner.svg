@@ -1,0 +1,63 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 240" width="960" height="240">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#0d0221"/>
+      <stop offset="50%" stop-color="#150531"/>
+      <stop offset="100%" stop-color="#0d0221"/>
+    </linearGradient>
+    <linearGradient id="purple" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="#a855f7"/>
+      <stop offset="50%" stop-color="#c084fc"/>
+      <stop offset="100%" stop-color="#a855f7"/>
+    </linearGradient>
+    <linearGradient id="accent" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="#7c3aed"/>
+      <stop offset="100%" stop-color="#8b5cf6"/>
+    </linearGradient>
+    <linearGradient id="glow" x1="0.5" y1="0" x2="0.5" y2="1">
+      <stop offset="0%" stop-color="#c084fc" stop-opacity="0.8"/>
+      <stop offset="100%" stop-color="#7c3aed" stop-opacity="0.2"/>
+    </linearGradient>
+    <filter id="blur">
+      <feGaussianBlur stdDeviation="3"/>
+    </filter>
+    <filter id="soft">
+      <feGaussianBlur stdDeviation="8"/>
+    </filter>
+  </defs>
+
+  <!-- Background -->
+  <rect width="960" height="240" fill="url(#bg)" rx="12"/>
+
+  <!-- Glow effects -->
+  <ellipse cx="480" cy="120" rx="350" ry="100" fill="#7c3aed" opacity="0.08" filter="url(#soft)"/>
+  <ellipse cx="200" cy="100" rx="150" ry="80" fill="#a855f7" opacity="0.06" filter="url(#soft)"/>
+  <ellipse cx="760" cy="140" rx="200" ry="90" fill="#8b5cf6" opacity="0.05" filter="url(#soft)"/>
+
+  <!-- Decorative lines -->
+  <line x1="60" y1="30" x2="900" y2="30" stroke="#3b0764" stroke-width="0.5" opacity="0.5"/>
+  <line x1="60" y1="210" x2="900" y2="210" stroke="#3b0764" stroke-width="0.5" opacity="0.5"/>
+
+  <!-- Terminal dots -->
+  <circle cx="72" cy="20" r="5" fill="#ef4444" opacity="0.7"/>
+  <circle cx="92" cy="20" r="5" fill="#f59e0b" opacity="0.7"/>
+  <circle cx="112" cy="20" r="5" fill="#22c55e" opacity="0.7"/>
+
+  <!-- Main text: OpenPurple -->
+  <text x="480" y="108" text-anchor="middle" font-family="system-ui, monospace" font-size="64" font-weight="900" letter-spacing="2" fill="url(#purple)">OpenPurple</text>
+
+  <!-- Subtitle -->
+  <text x="480" y="148" text-anchor="middle" font-family="system-ui, sans-serif" font-size="18" fill="#a78bfa" letter-spacing="4">MULTI-AGENT COLLABORATION PLATFORM</text>
+
+  <!-- Tagline -->
+  <text x="480" y="178" text-anchor="middle" font-family="system-ui, sans-serif" font-size="13" fill="#6d28d9" letter-spacing="1">AGENTS WORK LIKE A REAL TEAM · BUILT ON OPENTUI + EFFECT-TS</text>
+
+  <!-- Decorative brackets -->
+  <text x="170" y="110" font-family="monospace" font-size="48" fill="#3b0764" opacity="0.5">[</text>
+  <text x="788" y="110" font-family="monospace" font-size="48" fill="#3b0764" opacity="0.5">]</text>
+
+  <!-- Agents: A B C -->
+  <text x="340" y="200" text-anchor="middle" font-family="monospace" font-size="14" fill="#a855f7">▣ A · Alice</text>
+  <text x="480" y="200" text-anchor="middle" font-family="monospace" font-size="14" fill="#c084fc">○ B · Bob</text>
+  <text x="620" y="200" text-anchor="middle" font-family="monospace" font-size="14" fill="#a855f7">○ C · Carol</text>
+</svg>
