@@ -4,7 +4,6 @@
   "name": "openpurple",
   "type": "module",
   "license": "MIT",
-  "private": true,
   "scripts": {
     "typecheck": "tsgo --noEmit",
     "test": "bun test --timeout 30000",

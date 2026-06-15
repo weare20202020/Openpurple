@@ -177,8 +177,16 @@ bun run build -- --single
 
 ### Distribution / 分发
 
-当前通过 GitHub Releases 分发二进制文件（`.exe`），暂未发布 npm。  
-`package.json` 设置 `"private": true`，等稳定后去除并走 `npm publish`。
+两种方式：
+
+**GitHub Releases** — 下载预编译的 `.exe` 二进制（推荐）  
+**npm** — `npm install -g openpurple` 后直接 `openpurple` 命令
+
+```bash
+# 发布到 npm（maintainer 操作）
+cd packages/opencode
+npm publish
+```
 
 ---
 
