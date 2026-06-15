@@ -140,31 +140,45 @@ The system prompt is dynamically injected; tool definitions are filtered at the 
 
 ### Prerequisites
 
-- **Windows** (primary platform)
+- **Windows** (primary), or Linux/macOS
 - **Bun** ≥ 1.3.14
+- **Git**
 
-### Build
+### Clone & Build
+
+OpenPurple 是单文件二进制发布，先 clone 后本地构建：
+
+```bash
+git clone https://github.com/weare20202020/Openpurple.git
+cd Openpurple/packages/opencode
+bun install
+bun run build -- --single
+```
+
+构建产物在 `dist/openpurple-windows-x64/bin/openpurple.exe`。
+
+### Run / 启动
+
+```bash
+# 在 repo 根目录
+.\openpurple.cmd
+
+# 或手动：
+.\packages\opencode\dist\openpurple-windows-x64\bin\openpurple.exe run --interactive
+```
+
+### Rebuild after changes / 修改源码后重建
 
 ```bash
 cd packages/opencode
 bun run build -- --single
+# ⚠️ 构建前关闭所有 TUI 实例，否则 exe 被锁 EPERM
 ```
 
-### Run
+### Distribution / 分发
 
-```bash
-openpurple run --interactive    # launch TUI
-openpurple                      # CLI help
-```
-
-### Development
-
-```bash
-# After modifying source:
-cd packages/opencode
-bun run build -- --single
-# Close all TUI instances first (exe file lock)
-```
+当前通过 GitHub Releases 分发二进制文件（`.exe`），暂未发布 npm。  
+`package.json` 设置 `"private": true`，等稳定后去除并走 `npm publish`。
 
 ---
 
