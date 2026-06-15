@@ -1,6 +1,9 @@
-<p align="center">
-  <img src="https://raw.githubusercontent.com/weare20202020/Openpurple/main/docs/banner.svg" alt="OpenPurple" width="800" />
-</p>
+<div align="center">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="docs/banner-dark.svg">
+    <img src="docs/banner.svg" alt="OpenPurple" width="800" />
+  </picture>
+</div>
 
 <p align="center">
   <strong>Multi-Agent Collaboration Platform</strong><br>
