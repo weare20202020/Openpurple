@@ -1,8 +1,10 @@
 <div align="center">
-  <picture>
-    <source media="(prefers-color-scheme: dark)" srcset="docs/banner-dark.svg">
-    <img src="docs/banner.svg" alt="OpenPurple" width="800" />
-  </picture>
+  <pre style="display: inline-block; text-align: left; line-height: 1.15; font-size: 12px; font-family: 'Courier New', Courier, monospace; background: transparent; border: none; padding: 0;">
+<span style="color: #64748b;">                   </span> <span style="color: #64748b;">                             </span>
+<span style="color: #f1f5f9;">█▀▀█ █▀▀█ █▀▀█ █▀▀▄</span> <span style="color: #a855f7;">█▀▀█ █  █ █▀▀█ █▀▀█ █    █▀▀█</span>
+<span style="color: #f1f5f9;">█  █ █  █ █▀▀▀ █  █</span> <span style="color: #c084fc;">█  █ █  █ █▀▀▄ █  █ █    █▀▀▀</span>
+<span style="color: #64748b;">▀▀▀▀ █▀▀▀ ▀▀▀▀ ▀  ▀</span> <span style="color: #e9d5ff;">█▀▀▀ ▀▀▀▀ ▀  ▀ █▀▀▀ ▀▀▀▀ ▀▀▀▀</span>
+  </pre>
 </div>
 
 <p align="center">
