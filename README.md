@@ -281,7 +281,7 @@ See [PLAN.md](./PLAN.md) and [STATUS.md](./STATUS.md) for details.
 
 ## Credits / 致谢
 
-OpenPurple is a fork of [OpenCode](https://github.com/anthropics/opencode) v1.16.0 by Anthropic.  
+OpenPurple is a fork of [OpenCode](https://github.com/anomalyco/opencode) v1.16.0 by Anomaly.  
 Rebuilt with a new identity: **from single-agent tool to multi-agent team platform**.
 
 ---
