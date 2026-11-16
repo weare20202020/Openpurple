@@ -8,6 +8,7 @@ import { Log } from "@opencode-ai/core/util/log"
 import { SessionRevert } from "./revert"
 import { Session } from "./session"
 import { Agent } from "../agent/agent"
+import { AgentManager } from "../agent/manager"
 import { Provider } from "@/provider/provider"
 
 import { type Tool as AITool, tool, jsonSchema } from "ai"
@@ -689,6 +690,11 @@ export const layer = Layer.effect(
         yield* events.publish(Session.Event.Error, { sessionID: input.sessionID, error: error.toObject() })
         throw error
       }
+
+      // Keep the A2A binding pointed at the session this agent was most
+      // recently prompted in, so send_message reaches the agent's active
+      // session when the agent has more than one.
+      AgentManager.register({ id: ag.name, name: ag.name, sessionID: input.sessionID })
 
       const current = yield* db
         .select({ agent: SessionTable.agent, model: SessionTable.model })

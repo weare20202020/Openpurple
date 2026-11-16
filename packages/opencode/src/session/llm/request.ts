@@ -56,7 +56,9 @@ const mergeOptions = (target: Record<string, any>, source: Record<string, any> |
 export const prepare = Effect.fn("LLMRequestPrep.prepare")(function* (input: PrepareInput) {
   const isOpenaiOauth = input.provider.id === "openai" && input.auth?.type === "oauth"
   const basePrompt = input.agent.prompt
-    ? [input.agent.prompt]
+    ? input.agent.appendDefaultPrompt
+      ? [input.agent.prompt, ...SystemPrompt.provider(input.model)]
+      : [input.agent.prompt]
     : SystemPrompt.provider(input.model)
   // Inject agent identity
   if (!input.agent.prompt) {

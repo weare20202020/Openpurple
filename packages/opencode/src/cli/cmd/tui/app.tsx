@@ -605,7 +605,24 @@ function App(props: { onSnapshot?: () => Promise<string[]> }) {
         category: "Session",
         slashName: "new",
         slashAliases: ["clear"],
-        run: () => {
+        run: async () => {
+          const agent = local.agent.current()
+          const model = local.model.current()
+          if (agent && model) {
+            const res = await sdk.client.session.create({
+              agent: agent.name,
+              model: {
+                providerID: model.providerID,
+                id: model.modelID,
+                variant: local.model.variant.current(),
+              },
+            })
+            if (res.data?.id) {
+              route.navigate({ type: "session", sessionID: res.data.id })
+              dialog.clear()
+              return
+            }
+          }
           route.navigate({
             type: "home",
           })

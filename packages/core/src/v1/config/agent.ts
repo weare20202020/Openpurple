@@ -18,6 +18,9 @@ const AgentSchema = Schema.StructWithRest(
     temperature: Schema.optional(Schema.Finite),
     top_p: Schema.optional(Schema.Finite),
     prompt: Schema.optional(Schema.String),
+    appendDefaultPrompt: Schema.optional(Schema.Boolean).annotate({
+      description: "When true, the agent prompt is prepended to the default provider prompt instead of replacing it.",
+    }),
     tools: Schema.optional(Schema.Record(Schema.String, Schema.Boolean)).annotate({
       description: "@deprecated Use 'permission' field instead",
     }),
@@ -45,6 +48,7 @@ const KNOWN_KEYS = new Set([
   "model",
   "variant",
   "prompt",
+  "appendDefaultPrompt",
   "description",
   "temperature",
   "top_p",

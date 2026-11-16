@@ -9,6 +9,9 @@ import { Auth } from "../auth"
 import { ProviderTransform } from "@/provider/transform"
 
 import PROMPT_GENERATE from "./generate.txt"
+import PROMPT_ALICE from "./prompt/alice.txt"
+import PROMPT_BOB from "./prompt/bob.txt"
+import PROMPT_CAROL from "./prompt/carol.txt"
 import PROMPT_COMPACTION from "./prompt/compaction.txt"
 import PROMPT_EXPLORE from "./prompt/explore.txt"
 import PROMPT_SUMMARY from "./prompt/summary.txt"
@@ -45,6 +48,7 @@ export const Info = Schema.Struct({
   ),
   variant: Schema.optional(Schema.String),
   prompt: Schema.optional(Schema.String),
+  appendDefaultPrompt: Schema.optional(Schema.Boolean),
   options: Schema.Record(Schema.String, Schema.Unknown),
   steps: Schema.optional(Schema.Finite),
 }).annotate({ identifier: "Agent" })
@@ -56,8 +60,20 @@ const GeneratedAgent = Schema.Struct({
   systemPrompt: Schema.String,
 })
 
+export interface RegisterInput {
+  readonly name: string
+  readonly description?: string
+  readonly prompt?: string
+  readonly appendDefaultPrompt?: boolean
+  readonly model?: {
+    modelID: ModelV2.ID
+    providerID: ProviderV2.ID
+  }
+}
+
 export interface Interface {
   readonly get: (agent: string) => Effect.Effect<Info>
+  readonly register: (input: RegisterInput) => Effect.Effect<Info>
   readonly list: () => Effect.Effect<Info[]>
   readonly defaultInfo: () => Effect.Effect<Info>
   readonly defaultAgent: () => Effect.Effect<string>
@@ -128,6 +144,8 @@ export const layer = Layer.effect(
           alice: {
             name: "A",
             description: "Lead agent for planning and coordination.",
+            prompt: PROMPT_ALICE,
+            appendDefaultPrompt: true,
             options: {},
             permission: Permission.merge(defaults, user),
             mode: "primary",
@@ -136,6 +154,8 @@ export const layer = Layer.effect(
           bob: {
             name: "B",
             description: "Researcher agent for research and data analysis.",
+            prompt: PROMPT_BOB,
+            appendDefaultPrompt: true,
             options: {},
             permission: Permission.merge(defaults, user),
             mode: "primary",
@@ -144,6 +164,8 @@ export const layer = Layer.effect(
           carol: {
             name: "C",
             description: "Engineer for coding and architecture.",
+            prompt: PROMPT_CAROL,
+            appendDefaultPrompt: true,
             options: {},
             permission: Permission.merge(defaults, user),
             mode: "primary",
@@ -251,6 +273,7 @@ export const layer = Layer.effect(
           if (value.model) item.model = Provider.parseModel(value.model)
           item.variant = value.variant ?? item.variant
           item.prompt = value.prompt ?? item.prompt
+          item.appendDefaultPrompt = value.appendDefaultPrompt ?? item.appendDefaultPrompt
           item.description = value.description ?? item.description
           item.temperature = value.temperature ?? item.temperature
           item.topP = value.top_p ?? item.topP
@@ -278,6 +301,24 @@ export const layer = Layer.effect(
             Permission.fromConfig({ external_directory: { [Truncate.GLOB]: "allow" } }),
           )
         }
+
+        const register = Effect.fnUntraced(function* (input: RegisterInput) {
+          const existing = Object.values(agents).find((a) => a.name === input.name)
+          if (existing) return existing
+          const item: Info = {
+            name: input.name,
+            mode: "all",
+            native: false,
+            permission: Permission.merge(defaults, user),
+            options: {},
+          }
+          if (input.description !== undefined) item.description = input.description
+          if (input.prompt !== undefined) item.prompt = input.prompt
+          if (input.model !== undefined) item.model = input.model
+          if (input.appendDefaultPrompt !== undefined) item.appendDefaultPrompt = input.appendDefaultPrompt
+          agents[input.name] = item
+          return item
+        })
 
         const get = Effect.fnUntraced(function* (agent: string) {
           return Object.values(agents).find((a) => a.name === agent)
@@ -315,6 +356,7 @@ export const layer = Layer.effect(
 
         return {
           get,
+          register,
           list,
           defaultInfo,
           defaultAgent,
@@ -325,6 +367,9 @@ export const layer = Layer.effect(
     return Service.of({
       get: Effect.fn("Agent.get")(function* (agent: string) {
         return yield* InstanceState.useEffect(state, (s) => s.get(agent))
+      }),
+      register: Effect.fn("Agent.register")(function* (input: RegisterInput) {
+        return yield* InstanceState.useEffect(state, (s) => s.register(input))
       }),
       list: Effect.fn("Agent.list")(function* () {
         return yield* InstanceState.useEffect(state, (s) => s.list())
