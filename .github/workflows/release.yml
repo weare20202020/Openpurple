@@ -55,12 +55,12 @@ jobs:
         run: gh release edit "$GITHUB_REF_NAME" --draft=false
 
       - name: Publish to npm
-        if: ${{ secrets.NPM_TOKEN != '' }}
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
         working-directory: packages/opencode
-        run: bun run script/publish.ts
-
-      - name: Note skipped npm publish
-        if: ${{ secrets.NPM_TOKEN == '' }}
-        run: echo "NPM_TOKEN secret not set; npm publish skipped. Release binaries are attached to the GitHub release."
+        run: |
+          if [ -z "$NODE_AUTH_TOKEN" ]; then
+            echo "NPM_TOKEN secret not set; npm publish skipped. Release binaries are attached to the GitHub release."
+            exit 0
+          fi
+          bun run script/publish.ts
