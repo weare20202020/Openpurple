@@ -40,6 +40,7 @@ import { DialogStatus } from "@tui/component/dialog-status"
 import { DialogThemeList } from "@tui/component/dialog-theme-list"
 import { DialogHelp } from "./ui/dialog-help"
 import { DialogAgent } from "@tui/component/dialog-agent"
+import { DialogHeartbeat } from "@tui/component/dialog-heartbeat"
 import { DialogSessionList } from "@tui/component/dialog-session-list"
 import { DialogWorkspaceList } from "@tui/component/dialog-workspace-list"
 import { DialogConsoleOrg } from "@tui/component/dialog-console-org"
@@ -627,6 +628,28 @@ function App(props: { onSnapshot?: () => Promise<string[]> }) {
             type: "home",
           })
           dialog.clear()
+        },
+      },
+      {
+        name: "session.heartbeat",
+        title: "Heartbeat fallback",
+        category: "Session",
+        slashName: "heartbeat",
+        run: () => {
+          const agent = local.agent.current()
+          const model = local.model.current()
+          const data = route.data
+          let sessionID = data.type === "session" ? data.sessionID : undefined
+          if (!sessionID && agent) {
+            sessionID = sync.data.session
+              .toSorted((a, b) => b.time.updated - a.time.updated)
+              .find((s) => s.parentID === undefined && s.agent === agent.name)?.id
+          }
+          if (!sessionID || !agent || !model) {
+            toast.show({ variant: "error", message: "Heartbeat needs an active session" })
+            return
+          }
+          dialog.replace(() => <DialogHeartbeat sessionID={sessionID} />)
         },
       },
       {
