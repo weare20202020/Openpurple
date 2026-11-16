@@ -251,11 +251,17 @@ openpurple/
 │   │   └── dist/            # Build output (exe)
 │   ├── app/                 # Web UI (upstream, unchanged)
 │   ├── core/                # Shared schemas & utilities
-│   └── llm/                 # LLM provider integrations
-├── docs/                    # Implementation docs
+│   ├── llm/                 # LLM provider integrations
+│   ├── sdk/                 # SDK
+│   ├── server/              # Server
+│   ├── ui/                  # UI
+│   ├── plugin/              # Plugin system
+│   ├── script/              # Scripts
+│   ├── http-recorder/       # HTTP recorder
+│   ├── effect-drizzle-sqlite/ # Effect + Drizzle + SQLite
+│   └── effect-sqlite-node/  # Effect + SQLite (Node)
+├── docs/                    # Debug notes & banners
 ├── openpurple.cmd           # Launcher
-├── PLAN.md                  # Development roadmap
-├── STATUS.md                # Current project status
 └── README.md                # This file
 ```
 
@@ -275,7 +281,6 @@ openpurple/
 - [ ] Agent heartbeat & deadlock detection
 - [ ] Cross-session persistent memory
 
-See [PLAN.md](./PLAN.md) and [STATUS.md](./STATUS.md) for details.
 
 ---
 
