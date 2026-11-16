@@ -1,5 +1,6 @@
 import * as Tool from "./tool"
 import { ToolJsonSchema } from "./json-schema"
+import DESCRIPTION from "./send-message.txt"
 import { AgentManager } from "@/agent/manager"
 import { Agent } from "@/agent/agent"
 import { InboxStore } from "@/agent/inbox-store"
@@ -181,7 +182,7 @@ export const SendMessageTool = Tool.define(
       }).pipe(Effect.orDie) as Effect.Effect<Tool.ExecuteResult<Record<string, unknown>>>
 
     return {
-      description: "Send an asynchronous message to an agent",
+      description: DESCRIPTION,
       parameters: Parameters,
       jsonSchema: ToolJsonSchema.fromSchema(Parameters),
       execute,
