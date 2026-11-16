@@ -1,11 +1,1 @@
-{
-  "name": "@opencode-ai/sdk",
-  "private": true,
-  "main": "./js/src/index.ts",
-  "types": "./js/src/index.ts",
-  "exports": {
-    ".": "./js/src/index.ts",
-    "./v2": "./js/src/v2/index.ts",
-    "./v2/client": "./js/src/v2/client.ts"
-  }
-}
+{"dependencies":{"cross-spawn":"catalog:"},"devDependencies":{"@types/cross-spawn":"catalog:"},"exports":{".":"./js/src/index.ts","./v2":"./js/src/v2/index.ts","./v2/client":"./js/src/v2/client.ts"},"main":"./js/src/index.ts","name":"@opencode-ai/sdk","private":true,"types":"./js/src/index.ts"}

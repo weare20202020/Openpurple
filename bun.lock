@@ -405,6 +405,12 @@
     },
     "packages/sdk": {
       "name": "@opencode-ai/sdk",
+      "dependencies": {
+        "cross-spawn": "catalog:",
+      },
+      "devDependencies": {
+        "@types/cross-spawn": "catalog:",
+      },
     },
     "packages/server": {
       "name": "@opencode-ai/server",
