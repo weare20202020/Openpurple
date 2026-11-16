@@ -31,12 +31,12 @@
 
 Three AI agents — Alice, Bob, and Carol — collaborate in real-time through a TUI.  
 You are the lead. You talk to Alice. Alice delegates to Bob and Carol.  
-Each agent has its own memory, its own session, its own context window.  
+Each agent has its own memory, its own sessions, its own context window.  
 They talk to each other via `send_message`, just like a real team on Slack.
 
 三个 AI Agent（Alice/Bob/Carol）通过 TUI 实时协作。  
 你是主管，和 Alice 对话。Alice 委托任务给 Bob 和 Carol。  
-每个 Agent 有独立的记忆、独立的 Session、独立的 Context Window。  
+每个 Agent 有独立的记忆、独立的 Context Window，可以开多个属于自己的 Session。  
 彼此通过 `send_message` 沟通，像真人员工在 Slack 上一样。
 
 ---
@@ -58,8 +58,9 @@ They talk to each other via `send_message`, just like a real team on Slack.
 ### Core Collaboration / 核心协作
 
 - **3 Named Agents** — Alice (Lead/Coordinator), Bob (Researcher/Analyst), Carol (Engineer/Architect)
-- **Agent-to-Agent (A2A) messaging** — `send_message` for inter-agent task delegation, like Slack for AI: direct session-to-session delivery, in-process, no external protocol
-- **Independent Sessions** — Each agent has its own context window, memory, and conversation history
+- **Dynamic agents** — `create_agent` lets a calling agent define a new team member (name, role, system prompt, model); the definition is registered at runtime and persisted, so the new agent survives restarts
+- **Agent-to-Agent (A2A) messaging** — `send_message` for inter-agent task delegation, like Slack for AI: direct session-to-session delivery, in-process, no external protocol, with a SQLite-backed inbox that survives restarts
+- **Independent Sessions** — Each agent runs its own sessions, each with an independent context window, memory, and conversation history
 - **Async, deliberate replies** — A delegates to B and finishes its turn; B works independently and replies via `send_message` only when the result warrants it. No automatic acknowledgments: each agent judges whether a reply is needed, so two agents never fall into an endless 'ok / ok' loop.
 
 ### Mode System / 模式系统
@@ -88,7 +89,7 @@ They talk to each other via `send_message`, just like a real team on Slack.
 
 ### Innovation / 创新点
 
-1. **Session-to-Session A2A** — Each agent runs an independent session with its own context window. `send_message` delivers straight into the target agent's session, which picks the message up and works on it in its own context — delegation that reads like a real team handoff.
+1. **Session-to-Session A2A** — Each agent runs its own sessions, each with an independent context window. `send_message` delivers straight into the target agent's active session, which picks the message up and works on it in its own context — delegation that reads like a real team handoff.
 2. **Per-agent Mode** — Build/Plan isn't global. A can be planning while B is building. This reflects how real teams work.
 3. **Dictionary-level Tool Removal** — Plan mode doesn't just "tell" the LLM not to edit. It removes the edit tool definition from the AI's function calling dictionary entirely. The model cannot call what it cannot see.
 4. **Team OS Paradigm** — You're not pair-programming with AI. You're the lead of a 3-person AI team. You set direction; they execute autonomously.
@@ -111,7 +112,8 @@ They talk to each other via `send_message`, just like a real team on Slack.
 ```
 
 Each agent has:
-- Independent session & context window
+- Independent sessions & context windows
+- A dedicated system prompt — role, team conventions, and reply discipline
 - Independent memory & conversation history
 - Independent Build/Plan mode
 - The ability to `send_message` to any other agent
@@ -279,8 +281,8 @@ openpurple/
 - [x] Independent agent sessions
 - [x] `send_message` tool
 - [x] Agent status bar (idle/busy spinner)
-- [ ] `create_agent` — a calling agent defines a new team member (name, role, system prompt) and the definition is registered at runtime
-- [ ] Session isolation
+- [x] `create_agent` — a calling agent defines a new team member (name, role, system prompt) and the definition is registered at runtime
+- [x] Session isolation — sessions are per-agent and load only their own messages
 - [ ] 发布流程修复 — npm 平台包（linux/darwin）与安装链
 - [ ] Async AgentRunner — background event loop
 - [ ] Multi-agent TUI panels
