@@ -1,0 +1,66 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - "v*"
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    env:
+      GH_REPO: ${{ github.repository }}
+      GH_TOKEN: ${{ github.token }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: "1.4.4"
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "24"
+          registry-url: "https://registry.npmjs.org"
+
+      - name: Set version from tag
+        run: |
+          echo "OPENCODE_VERSION=${GITHUB_REF_NAME#v}" >> "$GITHUB_ENV"
+          echo "OPENCODE_CHANNEL=latest" >> "$GITHUB_ENV"
+          echo "OPENCODE_RELEASE=1" >> "$GITHUB_ENV"
+
+      - name: Create draft release
+        run: |
+          gh release view "$GITHUB_REF_NAME" >/dev/null 2>&1 \
+            || gh release create "$GITHUB_REF_NAME" --draft --title "$GITHUB_REF_NAME" --generate-notes
+
+      - name: Install dependencies
+        run: bun install
+
+      - name: Build all platforms and upload binaries
+        run: |
+          for attempt in 1 2 3; do
+            bun run build && break
+            echo "Build attempt $attempt failed, retrying in 10s..."
+            sleep 10
+            if [ "$attempt" = "3" ]; then echo "Build failed after 3 attempts"; exit 1; fi
+          done
+
+      - name: Publish release
+        run: gh release edit "$GITHUB_REF_NAME" --draft=false
+
+      - name: Publish to npm
+        if: ${{ secrets.NPM_TOKEN != '' }}
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+        working-directory: packages/opencode
+        run: bun run script/publish.ts
+
+      - name: Note skipped npm publish
+        if: ${{ secrets.NPM_TOKEN == '' }}
+        run: echo "NPM_TOKEN secret not set; npm publish skipped. Release binaries are attached to the GitHub release."
