@@ -37,11 +37,22 @@ const restoreInbox = (agentId: string) =>
         }),
       ),
     )
+    // Skip rows that are already queued in the in-memory inbox: the
+    // send_message that triggered this drain appended its row to SQLite
+    // and pushed the same message in-memory, so restoring it again would
+    // inject the message twice. Restored rows are prepended so older
+    // (recovered) messages are processed before newer ones.
+    const queued = new Set(
+      AgentManager.get(agentId)?.inbox.map((msg) => msg.id).filter((msgId): msgId is string => !!msgId) ?? [],
+    )
+    const fresh: InboxMessage[] = []
     for (const row of rows) {
+      if (queued.has(row.id)) continue
       const type = (["task", "question", "summary", "result"].includes(row.type) ? row.type : "task") as InboxMessage["type"]
-      AgentManager.pushInbox(agentId, { id: row.id, from: row.sender, type, content: row.content })
+      fresh.push({ id: row.id, from: row.sender, type, content: row.content })
     }
-    if (rows.length > 0) a2aLog.info("inbox restored", { agentId, count: rows.length })
+    if (fresh.length > 0) AgentManager.unshiftInbox(agentId, fresh)
+    if (rows.length > 0) a2aLog.info("inbox restored", { agentId, count: rows.length, fresh: fresh.length })
   })
 
 const drainInbox = (
@@ -110,19 +121,23 @@ export const SendMessageTool = Tool.define(
         const promptService = yield* SessionPromptService
         const sessions = yield* Session.Service
 
-        let target = AgentManager.get(params.to)
-        if (!target || !target.sessionID) {
-          const allSessions = yield* sessions.listGlobal({ roots: true })
-          const latest = allSessions
-            .filter((s) => s.agent === params.to)
-            .toSorted((a, b) => b.time.updated - a.time.updated)[0]
-          if (latest) {
-            AgentManager.register({ id: params.to, name: params.to, sessionID: latest.id })
-          } else {
-            const info = yield* sessions.create({ agent: params.to })
-            AgentManager.register({ id: params.to, name: params.to, sessionID: info.id })
-          }
-          target = AgentManager.get(params.to)!
+        // Route the message to a task-scoped session: reuse the session
+        // already serving this sender session, route replies back to the
+        // delegating session, or open a fresh session for a new exchange.
+        // Never reuse the target's most-recently-used session: that sent
+        // delegations into stale sessions from unrelated earlier tasks.
+        const resolved = AgentManager.resolveTargetSession(params.to, ctx.sessionID, ctx.agent)
+        if (resolved) {
+          AgentManager.setActive(params.to, resolved)
+        } else {
+          const info = yield* sessions.create({ agent: params.to })
+          AgentManager.recordDelegation({
+            id: params.to,
+            name: params.to,
+            senderSessionID: ctx.sessionID,
+            senderAgent: ctx.agent,
+            sessionID: info.id,
+          })
         }
 
         const caller = AgentManager.get(ctx.agent)
