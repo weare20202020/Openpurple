@@ -184,8 +184,8 @@ bun run build -- --single
 
 两种方式：
 
-**npm** — `npm install -g openpurple` 后直接 `openpurple` 命令（推荐）  
-**源码构建** — 按上面的 Clone & Build 步骤本地构建
+**源码构建** — 按上面的 Clone & Build 步骤本地构建（推荐，Windows/macOS/Linux 都可）  
+**npm** — `npm install -g openpurple`（发布流程有待修复，暂不可用）
 
 ```bash
 # 发布到 npm（maintainer 操作）
@@ -281,6 +281,7 @@ openpurple/
 - [x] Agent status bar (idle/busy spinner)
 - [ ] `create_agent` — a calling agent defines a new team member (name, role, system prompt) and the definition is registered at runtime
 - [ ] Session isolation
+- [ ] 发布流程修复 — npm 平台包（linux/darwin）与安装链
 - [ ] Async AgentRunner — background event loop
 - [ ] Multi-agent TUI panels
 - [ ] Task DAG orchestration engine
