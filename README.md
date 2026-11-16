@@ -46,7 +46,7 @@ They talk to each other via `send_message`, just like a real team on Slack.
 | Traditional AI Tool | OpenPurple |
 |---|---|
 | 单一模型，直接对话 | 三人团队，分工协作 |
-| 所有上下文混在一起 | 每个 Agent 独立 Session，信息隔离 |
+| 所有上下文混在一起 | 每个 Agent 独立 Session、独立上下文 |
 | 无委托能力 | Agent 之间 `send_message` 委派任务 |
 | 无多视角审查 | Bob 调研、Carol 开发、Alice 把关 |
 | 人盯屏幕看 AI 跑 | 像 TL 一样设定方向，AI 团队自主推进 |
@@ -58,16 +58,16 @@ They talk to each other via `send_message`, just like a real team on Slack.
 ### Core Collaboration / 核心协作
 
 - **3 Named Agents** — Alice (Lead/Coordinator), Bob (Researcher/Analyst), Carol (Engineer/Architect)
-- **Agent-to-Agent (A2A)** — `send_message` tool for inter-agent task delegation, like Slack/Skype for AI
-- **Isolated Sessions** — Each agent has independent context window, memory, and conversation history
-- **Async Non-blocking** — A delegates to B, finishes current turn; B works independently; results flow back automatically
+- **Agent-to-Agent (A2A) messaging** — `send_message` for inter-agent task delegation, like Slack for AI: direct session-to-session delivery, in-process, no external protocol
+- **Independent Sessions** — Each agent has its own context window, memory, and conversation history
+- **Async, deliberate replies** — A delegates to B and finishes its turn; B works independently and replies via `send_message` only when the result warrants it. No automatic acknowledgments: each agent judges whether a reply is needed, so two agents never fall into an endless 'ok / ok' loop.
 
 ### Mode System / 模式系统
 
 - **Build mode** — Full tool access (read, write, edit, bash, task, skill, etc.)
 - **Plan mode** — Read-only (all edit tools removed from tool dictionary; LLM literally cannot call them)
 - **Per-agent** — Each agent (A/B/C) has its own mode, independently toggleable
-- **TAB switch** — Press `TAB` to toggle Build ↔ Plan; `Shift+TAB` reverse
+- **TAB switch** — Press `TAB` to toggle Build ↔ Plan for the current agent
 - **Persistent** — Mode saved to SQLite, survives disconnects and restarts
 
 ### TUI Experience / 终端体验
@@ -76,19 +76,19 @@ They talk to each other via `send_message`, just like a real team on Slack.
 - **Animated Logo** — Interactive particle-shimmer ASCII art logo (click to burst!)
 - **Real-time Agent Status** — Idle ○ / Busy spinner per agent in status bar
 - **ESC interrupt** — Interrupt LLM output mid-stream
-- **Keyboard-driven** — Full keybind system, Vim-like modal editing
+- **Keyboard-driven** — Full keybind system, modal prompt editing
 
 ### Technical Foundation / 技术底座
 
-- **20+ LLM Providers** — OpenAI, Anthropic, Google, DeepSeek, GitHub Copilot, and more
+- **Broad provider support** — OpenAI, Anthropic, Google, DeepSeek, GitHub Copilot, OpenRouter, and any OpenAI-compatible endpoint
 - **SQLite + Drizzle** — Local-first storage, no cloud dependency
 - **Effect-TS Architecture** — Type-safe dependency injection, composable services
 - **Single Binary** — `bun build` into one `openpurple.exe` (~140MB)
-- **Windows-first** — Cross-platform support planned
+- **Cross-platform builds** — Windows, macOS, and Linux targets from a single build script
 
 ### Innovation / 创新点
 
-1. **Session-to-Session A2A** — Not tool-to-agent. Each agent has an independent session. Communication is session writing into another session's history. No message bus needed.
+1. **Session-to-Session A2A** — Each agent runs an independent session with its own context window. `send_message` delivers straight into the target agent's session, which picks the message up and works on it in its own context — delegation that reads like a real team handoff.
 2. **Per-agent Mode** — Build/Plan isn't global. A can be planning while B is building. This reflects how real teams work.
 3. **Dictionary-level Tool Removal** — Plan mode doesn't just "tell" the LLM not to edit. It removes the edit tool definition from the AI's function calling dictionary entirely. The model cannot call what it cannot see.
 4. **Team OS Paradigm** — You're not pair-programming with AI. You're the lead of a 3-person AI team. You set direction; they execute autonomously.
@@ -115,7 +115,6 @@ Each agent has:
 - Independent memory & conversation history
 - Independent Build/Plan mode
 - The ability to `send_message` to any other agent
-- The ability to `create_agent` (spawn new team members at runtime)
 
 ---
 
@@ -132,7 +131,7 @@ Each agent has:
 | Switch | `TAB` | `TAB` |
 
 Each agent independently toggles. A can be in Plan (thinking) while C is in Build (coding).  
-The system prompt is dynamically injected; tool definitions are filtered at the AI SDK layer.
+Tool definitions are filtered by the session's permission rules before the model ever sees them.
 
 ---
 
@@ -155,7 +154,7 @@ bun install
 bun run build -- --single
 ```
 
-构建产物在 `dist/openpurple-windows-x64/bin/openpurple.exe`。
+构建产物在 `dist/openpurple-<平台>-<架构>/bin/`，Windows 上是 `openpurple.exe`。
 
 ### Run / 启动
 
@@ -165,6 +164,12 @@ bun run build -- --single
 
 # 或手动：
 .\packages\opencode\dist\openpurple-windows-x64\bin\openpurple.exe run --interactive
+```
+
+Linux/macOS 上直接运行对应平台的二进制：
+
+```bash
+./packages/opencode/dist/openpurple-linux-x64/bin/openpurple
 ```
 
 ### Rebuild after changes / 修改源码后重建
@@ -179,8 +184,8 @@ bun run build -- --single
 
 两种方式：
 
-**GitHub Releases** — 下载预编译的 `.exe` 二进制（推荐）  
-**npm** — `npm install -g openpurple` 后直接 `openpurple` 命令
+**npm** — `npm install -g openpurple` 后直接 `openpurple` 命令（推荐）  
+**源码构建** — 按上面的 Clone & Build 步骤本地构建
 
 ```bash
 # 发布到 npm（maintainer 操作）
@@ -230,7 +235,7 @@ npm publish
 | TUI | SolidJS + OpenTUI |
 | Storage | SQLite + Drizzle ORM |
 | Build | Bun.build → single binary |
-| Platform | Windows (cross-platform planned) |
+| Platform | Windows, macOS, Linux |
 
 ---
 
@@ -272,9 +277,10 @@ openpurple/
 - [x] Agent definitions (Alice/Bob/Carol)
 - [x] Build/Plan mode toggle (per-agent)
 - [x] Independent agent sessions
-- [x] `send_message` / `create_agent` tools
+- [x] `send_message` tool
 - [x] Agent status bar (idle/busy spinner)
-- [ ] AgentBus — A2A message routing
+- [ ] `create_agent` — a calling agent defines a new team member (name, role, system prompt) and the definition is registered at runtime
+- [ ] Session isolation
 - [ ] Async AgentRunner — background event loop
 - [ ] Multi-agent TUI panels
 - [ ] Task DAG orchestration engine
