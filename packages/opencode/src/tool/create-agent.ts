@@ -1,5 +1,6 @@
 import * as Tool from "./tool"
 import { ToolJsonSchema } from "./json-schema"
+import DESCRIPTION from "./create-agent.txt"
 import { AgentManager } from "@/agent/manager"
 import { Agent } from "@/agent/agent"
 import { Provider } from "@/provider/provider"
@@ -93,7 +94,7 @@ export const CreateAgentTool = Tool.define(
       }).pipe(Effect.orDie) as Effect.Effect<Tool.ExecuteResult<Record<string, unknown>>>
 
     return {
-      description: "Create a new dynamic agent for task delegation",
+      description: DESCRIPTION,
       parameters: Parameters,
       jsonSchema: ToolJsonSchema.fromSchema(Parameters),
       execute,
