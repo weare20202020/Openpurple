@@ -31,13 +31,13 @@
 
 Most AI tools give you one assistant. OpenPurple gives you a team.
 
-Three named agents — Alice, Bob, and Carol — share one terminal, each with its own sessions, its own context, and its own job. You talk to Alice, the lead. Alice breaks the work down and delegates to Bob and Carol over `send_message`, the way a real team passes work on Slack. When the work comes back, Alice merges it into one answer for you.
+A team of named agents shares one terminal, each with its own sessions, its own context, and its own job. The default example team is Alice, Bob, and Carol: you talk to Alice, the lead, who breaks the work down and delegates to Bob and Carol over `send_message`, the way a real team passes work on Slack, then merges the results into one answer for you. Three is just the example — run two agents or ten: add members in config or at runtime with `create_agent`, remove them with `disable: true` in config.
 
 And the agents aren't black boxes you prompt and forget. They are colleagues you can talk to directly: switch to Bob mid-task and ask what he found, or jump to Carol and change her approach. The human stays in the team, not outside it.
 
 大多数 AI 工具给你一个助手，OpenPurple 给你一个团队。
 
-三个有名字的 Agent（Alice、Bob、Carol）共享一个终端，各自有独立的 Session、独立的上下文、独立的分工。你和主管 Alice 对话，Alice 拆任务，用 `send_message` 派给 Bob 和 Carol，像真人团队在 Slack 上交接一样；结果回来后，Alice 合并成一个答案交给你。
+一个由有名字的 Agent 组成的团队共享一个终端，各自有独立的 Session、独立的上下文、独立的分工。Alice、Bob、Carol 是默认的示例团队：你和主管 Alice 对话，Alice 拆任务，用 `send_message` 派给 Bob 和 Carol，像真人团队在 Slack 上交接一样；结果回来后，Alice 合并成一个答案交给你。三个人只是示例，两个、四个、十个都可以：在配置里加人、运行时用 `create_agent` 加人，配置里 `disable: true` 减人。
 
 而且这些 Agent 不是你发完 prompt 就看不见的黑盒，它们是你能直接对话的同事：任务中途切到 Bob 问他查到了什么，或者切到 Carol 改她的思路。人就在团队里，不是在外面看。
 
@@ -64,11 +64,11 @@ OpenPurple takes the other path: the team is the product.
 
 | Traditional AI Tool | OpenPurple |
 |---|---|
-| 单一模型，直接对话 | 三人团队，分工协作 |
+| 单一模型，直接对话 | Agent 团队，分工协作 |
 | 所有上下文混在一起 | 每个 Agent 独立 Session、独立上下文 |
 | 子代理用完即消失 | Agent 有身份、有自己的 Session，人能直接对话 |
 | 无委托能力 | Agent 之间 `send_message` 委派任务 |
-| 无多视角审查 | Bob 调研、Carol 核查、Alice 把关合并 |
+| 无多视角审查 | 分工调研、互相核查、合并把关 |
 | 人盯屏幕看 AI 跑 | 像 TL 一样设定方向，AI 团队自主推进 |
 | 回传漏了没人管 | 有意的回传纪律 + `/heartbeat` 定时兜底 |
 
@@ -78,7 +78,7 @@ OpenPurple takes the other path: the team is the product.
 
 ### Core Collaboration / 核心协作
 
-- **3 Named Agents** — Alice (Lead/Coordinator), Bob (Researcher/Analyst), Carol (Engineer/Architect). Each has a dedicated system prompt: role, team conventions, and reply discipline.
+- **Named agents, any team size** — Alice (Lead/Coordinator), Bob (Researcher/Analyst), and Carol (Engineer/Architect) are the default example team. Each has a dedicated system prompt: role, team conventions, and reply discipline. The team is not fixed: add agents in config or at runtime with `create_agent`, remove them with `disable: true` in config.
 - **Agents as colleagues** — every agent has a persistent identity, its own sessions, and its own context. Switch to any agent in the TUI and talk to it directly; it remembers its own work.
 - **Dynamic agents** — `create_agent` lets a calling agent define a new team member (name, role, system prompt, model); the definition is registered at runtime and persisted, so the new agent survives restarts.
 - **Agent-to-Agent (A2A) messaging** — `send_message` for inter-agent task delegation, like Slack for AI: direct session-to-session delivery, in-process, no external protocol, with a SQLite-backed inbox that survives restarts.
@@ -117,11 +117,13 @@ OpenPurple takes the other path: the team is the product.
 2. **Per-agent Mode** — Build/Plan isn't global. A can be planning while B is building. This reflects how real teams work.
 3. **Dictionary-level Tool Removal** — Plan mode doesn't just "tell" the LLM not to edit. It removes the edit tool definition from the AI's function calling dictionary entirely. The model cannot call what it cannot see.
 4. **Event-driven delivery, heartbeat fallback** — Messages arrive the moment they're sent, with no polling; the heartbeat only guards against the case where a reply never comes. Delivery is event-driven, liveness is heartbeat-guarded.
-5. **Team OS Paradigm** — You're not pair-programming with AI. You're the lead of a 3-person AI team. You set direction; they execute autonomously.
+5. **Team OS Paradigm** — You're not pair-programming with AI. You're the lead of an AI team. You set direction; they execute autonomously.
 
 ---
 
 ## Agents / Agent 系统
+
+Alice, Bob, and Carol are the default example team. The team size is yours to choose — two agents or ten.
 
 ```
 ┌─────────────────────────────────────────────┐
