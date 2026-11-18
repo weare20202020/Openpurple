@@ -30,6 +30,7 @@ import * as Truncate from "./truncate"
 import { ApplyPatchTool } from "./apply_patch"
 import { SendMessageTool } from "./send-message"
 import { CreateAgentTool } from "./create-agent"
+import { ListAgentsTool } from "./list-agents"
 import * as AgentBus from "../agent/bus"
 import { Glob } from "@opencode-ai/core/util/glob"
 import path from "path"
@@ -140,6 +141,7 @@ export const layer: Layer.Layer<
     const skilltool = yield* SkillTool
     const agent = yield* Agent.Service
     const createAgent = yield* CreateAgentTool
+    const listAgents = yield* ListAgentsTool
     const sendMessage = yield* SendMessageTool
 
     const state = yield* InstanceState.make<State>(
@@ -248,6 +250,7 @@ export const layer: Layer.Layer<
           lsp: Tool.init(lsptool),
           plan: Tool.init(plan),
           createAgent: Tool.init(createAgent),
+          listAgents: Tool.init(listAgents),
           sendMessage: Tool.init(sendMessage),
         })
 
@@ -271,6 +274,7 @@ export const layer: Layer.Layer<
             ...(flags.experimentalLspTool ? [tool.lsp] : []),
             ...(flags.experimentalPlanMode && flags.client === "cli" ? [tool.plan] : []),
             tool.createAgent,
+            tool.listAgents,
             tool.sendMessage,
           ],
           task: tool.task,

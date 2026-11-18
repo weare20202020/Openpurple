@@ -1,1 +1,9 @@
-Create a new dynamic agent at runtime. This allows you to define a specialized agent with a custom system prompt and optionally a different model. The agent will be registered with the agent manager and available for task delegation and message routing.
+Create a new agent at runtime and add it to the team. The agent is registered immediately, gets its own session, survives restarts (its definition is saved), and becomes reachable via send_message and visible via list_agents.
+
+When to create: a stage of the work needs a role no current teammate covers, or the independent stages outnumber the teammates available to run them. Check list_agents first — create only for a real gap.
+
+When NOT to create: the current teammates already cover the work; the task is small enough for one agent; you only need a single lookup or a quick answer. Do not create agents casually: each new agent costs context, coordination, and review.
+
+The system_prompt you supply IS the new agent's agent prompt. It must define: the agent's role, the task it owns, what "done" looks like, and reply discipline — report results back to you via send_message, never a bare acknowledgment, and if blocked, report what blocked it and what it tried.
+
+Example: a build spanning frontend, backend, testing, documentation, and deployment, with fewer teammates than stages and no teammate covering testing — create a test specialist, then delegate the testing stage. Counter-example: creating a second researcher while a researcher teammate sits idle, or creating an agent to look up one number — both waste the team.

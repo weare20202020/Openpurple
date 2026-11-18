@@ -1,0 +1,3 @@
+List the agents currently registered on this team, with each agent's name, role description, and current status (idle or busy).
+
+Call this before you delegate work or whenever you are unsure who is available: team membership changes at runtime — agents can be added with create_agent or removed through configuration — so never assume a fixed roster. The returned names are the addresses you use with send_message. Your own entry is marked.
